@@ -1,17 +1,13 @@
 # TZ City
 
-A Next.js site, protected by a username and password, that shows a three.js scene after you sign in. It's ready to deploy to Vercel.
+A Next.js site, protected by a username and password, that shows the Palace Walk three.js scene after you sign in. It's ready to deploy to Vercel.
 
 ## How it works
 
-- `middleware.ts` sends any visitor without a valid session to `/login`.
+- `middleware.ts` sends any visitor without a valid session to `/login`. This covers every page and every file in `public/`, including the scene files.
 - `/api/login` checks the credentials against environment variables and sets a signed, httpOnly session cookie (valid for 12 hours).
-- `/scene` serves `protected/scene.html`, the three.js page. The file lives outside `public/`, so it can't be fetched without signing in. The route also checks the session itself.
-- The home page shows `/scene` full-screen, with a logout button.
-
-## Using your own three.js file
-
-Replace `protected/scene.html` with your file. If it loads other local files (models, textures, JS), add routes for them or load them from a CDN. Anything in `public/` is also behind the middleware login.
+- The home page shows `public/palace-walk/index.html` full-screen, with a logout button.
+- Scene files live in `public/palace-walk/` (see its own README). `world.spz` is 61 MB and `world_lite.spz` is 21 MB.
 
 ## Environment variables
 
@@ -33,6 +29,6 @@ npm run dev
 
 ## Deploy to Vercel
 
-1. Push this folder to a GitHub, GitLab or Bitbucket repo and import it at vercel.com/new. Or run `npx vercel` from this folder.
+1. Import the GitHub repo at vercel.com/new.
 2. In **Project → Settings → Environment Variables**, add `AUTH_USERNAME`, `AUTH_PASSWORD` and `AUTH_SECRET`.
 3. Deploy, or redeploy if you added the variables after the first deploy.

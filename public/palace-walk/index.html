@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>宫苑回廊 · 实景漫步（第二版）</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#1a1410;color:#f4ead8;
+    font-family:"Songti SC","Noto Serif CJK SC","Source Han Serif SC","SimSun",Georgia,serif;
+    -webkit-user-select:none;user-select:none;touch-action:none}
+  #c{position:fixed;inset:0;width:100%;height:100%;display:block}
+  #start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(ellipse at 50% 40%,rgba(60,22,14,.5),rgba(14,9,6,.9));z-index:10;padding:20px;box-sizing:border-box}
+  #card{max-width:440px;width:100%;text-align:center}
+  #card h1{font-size:40px;letter-spacing:.3em;margin:0 0 6px .3em;font-weight:600;color:#f2c14e}
+  #card .sub{letter-spacing:.3em;font-size:13px;opacity:.75;margin-bottom:26px}
+  #card table{margin:0 auto 26px;border-collapse:collapse;font-size:15px;text-align:left}
+  #card td{padding:5px 10px;vertical-align:top}
+  #card td:first-child{color:#f2c14e;white-space:nowrap;text-align:right}
+  .desk,.touch{display:none}
+  body.is-touch .touch{display:table-row}
+  body.is-desk .desk{display:table-row}
+  button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  #go{display:none;background:#a3261b;border:1px solid #f2c14e;color:#fbe9b8;font-size:20px;letter-spacing:.5em;
+    padding:12px 30px 12px 40px;border-radius:2px}
+  #go:hover{background:#b93424}
+  #track{height:4px;background:rgba(255,240,210,.18);border-radius:2px;overflow:hidden;margin:0 auto 10px;max-width:300px}
+  #bar{height:100%;width:0;background:#f2c14e;transition:width .15s}
+  #quality{display:flex;gap:8px;justify-content:center;margin:0 0 16px}
+  #quality button{background:none;border:1px solid rgba(242,193,78,.45);font-size:14px;padding:6px 14px;border-radius:2px;opacity:.75}
+  #quality button.on{background:rgba(163,38,27,.7);border-color:#f2c14e;opacity:1}
+  #loadText{font-size:13px;opacity:.8;letter-spacing:.05em}
+  #hud{position:fixed;left:0;right:0;bottom:0;z-index:5;display:none;pointer-events:none;
+    padding:10px 10px calc(10px + env(safe-area-inset-bottom,0px));box-sizing:border-box}
+  #views{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;pointer-events:none}
+  #views button{pointer-events:auto;background:rgba(24,14,10,.62);border:1px solid rgba(242,193,78,.55);
+    font-size:14px;padding:9px 12px;border-radius:2px;min-height:40px;backdrop-filter:blur(4px)}
+  #views button:active{background:rgba(163,38,27,.85)}
+  #tip{position:fixed;top:12px;left:0;right:0;text-align:center;font-size:13px;letter-spacing:.08em;
+    text-shadow:0 1px 3px #000;opacity:.85;z-index:5;pointer-events:none;display:none;padding:0 12px}
+  #place{position:fixed;top:36px;left:0;right:0;text-align:center;font-size:20px;letter-spacing:.4em;
+    color:#f2c14e;text-shadow:0 1px 4px #000;z-index:5;pointer-events:none;opacity:0;transition:opacity .8s}
+  #joy{position:fixed;width:120px;height:120px;border-radius:50%;border:2px solid rgba(255,240,210,.5);
+    background:rgba(20,12,8,.25);display:none;z-index:6;pointer-events:none;transform:translate(-50%,-50%)}
+  #knob{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px;border-radius:50%;background:rgba(242,193,78,.75)}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="start"><div id="card">
+  <h1>宫苑回廊</h1>
+  <div class="sub">实景漫步</div>
+  <table>
+    <tr class="desk"><td>W A S D</td><td>行走（按住 Shift 加速）</td></tr>
+    <tr class="desk"><td>鼠标</td><td>转动视角（Esc 释放鼠标）</td></tr>
+    <tr class="desk"><td>数字键</td><td>跳到各个视点</td></tr>
+    <tr class="touch"><td>左半屏</td><td>拖动行走</td></tr>
+    <tr class="touch"><td>右半屏</td><td>拖动转动视角</td></tr>
+    <tr class="touch"><td>底部按钮</td><td>跳到各个视点</td></tr>
+  </table>
+  <div id="quality"></div>
+  <div id="loading"><div id="track"><div id="bar"></div></div><div id="loadText">正在载入场景…</div></div>
+  <button id="go">进入</button>
+</div></div>
+<div id="tip"></div>
+<div id="place"></div>
+<div id="hud"><div id="views"></div></div>
+<div id="joy"><div id="knob"></div></div>
+<script>
+  // 视点：x、z 为位置（米），yaw 为朝向（0 = 沿回廊向前，-1.57 = 朝右）
+  window.PALACE_VIEWS = [
+    { name:'回廊起点', x:0, z:0,  yaw:0 },
+    { name:'台阶口',   x:0, z:0,  yaw:-1.5708 },
+    { name:'平台远眺', x:8, z:0,  yaw:-1.5708 },
+    { name:'回望回廊', x:0, z:-3, yaw:3.1416 }
+  ];
+</script>
+<script>
+  // 素材放在别处（例如 CDN）时改这里，例如 window.PALACE_ASSETS = "https://cdn.example.com/palace/";
+  window.PALACE_ASSETS = "./assets/";
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

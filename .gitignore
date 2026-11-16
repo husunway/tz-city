@@ -5,3 +5,6 @@ out
 .env*.local
 .vercel
 *.tsbuildinfo
+
+# Original copy of the scene; the site uses public/palace-walk
+/palace-walk/

@@ -1,4 +1,5 @@
 // Protected by middleware: only reachable with a valid session cookie.
+// The palace walk files live in public/palace-walk and are also behind the middleware.
 export default function Home() {
   return (
     <main className="viewer">
@@ -8,7 +9,12 @@ export default function Home() {
           <button type="submit">Log out</button>
         </form>
       </header>
-      <iframe src="/scene" title="three.js scene" />
+      <iframe
+        src="/palace-walk/index.html"
+        title="Palace Walk"
+        allow="fullscreen"
+        allowFullScreen
+      />
     </main>
   );
 }
